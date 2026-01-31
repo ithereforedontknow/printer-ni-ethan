@@ -1,0 +1,53 @@
+{
+  "name": "Photo Layout Pro",
+  "short_name": "PhotoLayout",
+  "description": "Professional photo layout and printing tool",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "photo", "utilities"],
+  "shortcuts": [
+    {
+      "name": "New Layout",
+      "short_name": "New",
+      "description": "Create a new photo layout",
+      "url": "/?new=true"
+    },
+    {
+      "name": "Recent Projects",
+      "short_name": "Recent",
+      "description": "View recent projects",
+      "url": "/?recent=true"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/screenshot-mobile.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ]
+}
