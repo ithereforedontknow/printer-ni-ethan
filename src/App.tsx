@@ -134,10 +134,11 @@ const App: React.FC = () => {
   });
 
   useEffect(() => {
-    // Cast handleKeyDown to any temporarily if the type definition for keyboard events is too strict
-    // A better long-term solution would be to refine the useKeyboardShortcuts hook's event type.
-    window.addEventListener("keydown", handleKeyDown as any);
-    return () => window.removeEventListener("keydown", handleKeyDown as any);
+    // handleKeyDown is expected to be a KeyboardEvent handler, which is compatible with EventListener.
+    // The previous `as any` cast is often a workaround for slightly different React vs DOM event types.
+    // Assuming `useKeyboardShortcuts` returns a handler compatible with native `KeyboardEvent`.
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
   // Update photo size
@@ -173,7 +174,7 @@ const App: React.FC = () => {
 
   // Remove photo
   const removePhoto = (photoId: number) => {
-    setPhotos(photos.filter((photo) => photo.id !== photoId));
+    setPhotos(photos.filter((photo) => !selectedPhotoIds.has(photo.id)));
     setSelectedPhotoIds((prev) => {
       const newSet = new Set(prev);
       newSet.delete(photoId);
@@ -721,12 +722,21 @@ const App: React.FC = () => {
                               step="0.01" // more precision in advanced mode
                               min="0"
                               max="2"
-                              value={settings[key] as number} // Explicitly cast to number
+                              value={
+                                typeof settings[key as keyof LayoutSettings] ===
+                                "boolean"
+                                  ? settings[key as keyof LayoutSettings]
+                                    ? "true"
+                                    : "false"
+                                  : String(
+                                      settings[key as keyof LayoutSettings],
+                                    )
+                              }
                               onChange={(e) =>
-                                setSettings({
-                                  ...settings,
+                                setSettings((prevSettings) => ({
+                                  ...prevSettings,
                                   [key]: parseFloat(e.target.value) || 0,
-                                })
+                                }))
                               }
                               className="w-full p-2.5 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             />
@@ -1146,7 +1156,7 @@ const App: React.FC = () => {
                     <canvas
                       ref={canvasRef}
                       className="max-w-full h-auto shadow-2xl rounded-lg border-4 border-white"
-                      style={{ imageRendering: "optimizeQuality" }}
+                      style={{ imageRendering: "smooth" }}
                     />
                   </div>
                 )}
