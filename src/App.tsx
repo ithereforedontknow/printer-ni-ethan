@@ -467,49 +467,6 @@ const App: React.FC = () => {
     pdf.save(`photo-layout-${totalPages}-pages-${Date.now()}.pdf`);
   };
 
-  // Save layout as JSON (commented out in JSX, so function is unused)
-  /*
-  const saveLayout = () => {
-    const layoutData = {
-      photos,
-      paperSize,
-      settings,
-      algorithm: packingAlgorithm,
-      timestamp: new Date().toISOString(),
-    };
-
-    const blob = new Blob([JSON.stringify(layoutData, null, 2)], {
-      type: "application/json",
-    });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = `photo-layout-${Date.now()}.json`;
-    link.click();
-  };
-  */
-
-  // Load layout from JSON (commented out in JSX, so function is unused)
-  /*
-  const loadLayout = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const layoutData = JSON.parse(event.target?.result as string);
-        setPhotos(layoutData.photos || []);
-        setPaperSize(layoutData.paperSize || paperSizes[0]);
-        setSettings(layoutData.settings || settings);
-        setPackingAlgorithm(layoutData.algorithm || "maxrects");
-      } catch (error) {
-        alert("Failed to load layout file");
-      }
-    };
-    reader.readAsText(file);
-  };
-  */
-
   const totalPhotos = photos.reduce(
     (sum, photo) => sum + (photo.quantity || 1),
     0,
@@ -518,23 +475,10 @@ const App: React.FC = () => {
   const totalPages = layoutResult
     ? Math.max(...layoutResult.map((p) => p.pageIndex)) + 1
     : 0;
-  const efficiency =
-    packedPhotos > 0 ? ((packedPhotos / totalPhotos) * 100).toFixed(1) : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6">
-      <div className="max-w-[1800px] mx-auto">
-        {/* Header */}
-        <div className="text-center mb-6">
-          {/*<h1 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 mb-3 tracking-tight">
-            Pang Print ni Ethan
-          </h1>*/}
-          {/*<p className="text-gray-600 text-lg font-medium">
-            Professional multi-page photo layout generator with advanced packing
-            algorithms
-          </p>*/}
-        </div>
-
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 p-6">
+      <div className="max-w-450 mx-auto">
         {/* Main Grid */}
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
           {/* Left Sidebar - Controls */}
@@ -643,30 +587,10 @@ const App: React.FC = () => {
                 </button>
               </div>
 
-              {/*<div className="flex gap-2 mb-3">
-                <button
-                  onClick={saveLayout}
-                  className="flex-1 p-2.5 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors font-bold text-sm flex items-center justify-center gap-2"
-                >
-                  <Save className="w-4 h-4" />
-                  Save
-                </button>
-                <label className="flex-1 p-2.5 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors font-bold text-sm flex items-center justify-center gap-2 cursor-pointer">
-                  <FolderOpen className="w-4 h-4" />
-                  Load
-                  <input
-                    type="file"
-                    accept=".json"
-                    onChange={loadLayout}
-                    className="hidden"
-                  />
-                </label>
-              </div>*/}
-
               <button
                 onClick={generateLayout}
                 disabled={photos.length === 0 || isGenerating}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3.5 rounded-xl font-black hover:from-blue-700 hover:to-purple-700 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all duration-200 shadow-lg text-sm uppercase tracking-wide"
+                className="w-full bg-linear-to-r from-blue-600 to-purple-600 text-white py-3.5 rounded-xl font-black hover:from-blue-700 hover:to-purple-700 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all duration-200 shadow-lg text-sm uppercase tracking-wide"
               >
                 {isGenerating ? (
                   <>
@@ -936,7 +860,7 @@ const App: React.FC = () => {
                       }`}
                     >
                       <div className="flex items-center gap-3 mb-2">
-                        <div className="relative flex-shrink-0">
+                        <div className="relative shrink-0">
                           <img
                             src={photo.dataUrl}
                             alt={photo.name}
@@ -1111,37 +1035,6 @@ const App: React.FC = () => {
                 )}
               </div>
 
-              {layoutResult && (
-                <div className="mb-4 grid grid-cols-4 gap-3 text-center">
-                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-3 border-2 border-blue-200">
-                    <p className="text-2xl font-black text-blue-700">
-                      {packedPhotos}
-                    </p>
-                    <p className="text-xs font-bold text-blue-600">Photos</p>
-                  </div>
-                  <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-3 border-2 border-green-200">
-                    <p className="text-2xl font-black text-green-700">
-                      {efficiency}%
-                    </p>
-                    <p className="text-xs font-bold text-green-600">
-                      Efficiency
-                    </p>
-                  </div>
-                  <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-3 border-2 border-purple-200">
-                    <p className="text-2xl font-black text-purple-700">
-                      {totalPages}
-                    </p>
-                    <p className="text-xs font-bold text-purple-600">Pages</p>
-                  </div>
-                  <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-3 border-2 border-orange-200">
-                    <p className="text-2xl font-black text-orange-700">
-                      {totalPhotos - packedPhotos}
-                    </p>
-                    <p className="text-xs font-bold text-orange-600">Not Fit</p>
-                  </div>
-                </div>
-              )}
-
               <div className="border-2 border-gray-200 rounded-xl p-4 bg-gray-50 overflow-auto">
                 {!layoutResult ? (
                   <div className="flex flex-col items-center justify-center py-32 text-gray-400">
@@ -1163,7 +1056,7 @@ const App: React.FC = () => {
               </div>
 
               {layoutResult && packedPhotos < totalPhotos && (
-                <div className="mt-4 bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-300 rounded-xl p-4">
+                <div className="mt-4 bg-linear-to-r from-yellow-50 to-orange-50 border-2 border-yellow-300 rounded-xl p-4">
                   <p className="text-sm font-bold text-yellow-900">
                     ⚠️ {totalPhotos - packedPhotos} photo(s) could not fit.
                   </p>
@@ -1178,7 +1071,7 @@ const App: React.FC = () => {
         </div>
 
         {/* Keyboard Shortcuts Help */}
-        <div className="mt-6 bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl p-4 text-white">
+        <div className="mt-6 bg-linear-to-r from-gray-800 to-gray-900 rounded-xl p-4 text-white">
           <p className="text-sm font-bold mb-2">⌨️ Keyboard Shortcuts:</p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
             <div>
