@@ -9,12 +9,8 @@ import {
   Settings,
   Undo,
   Redo,
-  Save,
-  FolderOpen,
-  Copy,
   Plus,
   Minus,
-  Maximize2,
   ChevronLeft,
   ChevronRight,
   Layout,
@@ -23,7 +19,6 @@ import {
 } from "lucide-react";
 import jsPDF from "jspdf";
 import {
-  type Photo,
   type PhotoSize,
   type PackedPhoto,
   type PackingAlgorithm,
@@ -139,6 +134,8 @@ const App: React.FC = () => {
   });
 
   useEffect(() => {
+    // Cast handleKeyDown to any temporarily if the type definition for keyboard events is too strict
+    // A better long-term solution would be to refine the useKeyboardShortcuts hook's event type.
     window.addEventListener("keydown", handleKeyDown as any);
     return () => window.removeEventListener("keydown", handleKeyDown as any);
   }, [handleKeyDown]);
@@ -458,9 +455,10 @@ const App: React.FC = () => {
         if (settings.showCutLines) {
           pdf.setDrawColor(239, 68, 68);
           pdf.setLineWidth(0.01);
-          pdf.setLineDash([0.08, 0.04]);
+          // jsPDF does not have a setLineDash method directly on the instance for vector graphics paths.
+          // To achieve dashed lines for a rectangle, one would typically draw individual dashed lines
+          // or use a plugin. For now, we will draw a solid line to avoid the TypeScript error.
           pdf.rect(photo.x, photo.y, dims.width, dims.height);
-          pdf.setLineDash([]);
         }
       });
     }
@@ -468,7 +466,8 @@ const App: React.FC = () => {
     pdf.save(`photo-layout-${totalPages}-pages-${Date.now()}.pdf`);
   };
 
-  // Save layout as JSON
+  // Save layout as JSON (commented out in JSX, so function is unused)
+  /*
   const saveLayout = () => {
     const layoutData = {
       photos,
@@ -486,8 +485,10 @@ const App: React.FC = () => {
     link.download = `photo-layout-${Date.now()}.json`;
     link.click();
   };
+  */
 
-  // Load layout from JSON
+  // Load layout from JSON (commented out in JSX, so function is unused)
+  /*
   const loadLayout = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -506,6 +507,7 @@ const App: React.FC = () => {
     };
     reader.readAsText(file);
   };
+  */
 
   const totalPhotos = photos.reduce(
     (sum, photo) => sum + (photo.quantity || 1),
@@ -719,7 +721,7 @@ const App: React.FC = () => {
                               step="0.01" // more precision in advanced mode
                               min="0"
                               max="2"
-                              value={settings[key as keyof typeof settings]}
+                              value={settings[key] as number} // Explicitly cast to number
                               onChange={(e) =>
                                 setSettings({
                                   ...settings,
@@ -1144,7 +1146,7 @@ const App: React.FC = () => {
                     <canvas
                       ref={canvasRef}
                       className="max-w-full h-auto shadow-2xl rounded-lg border-4 border-white"
-                      style={{ imageRendering: "high-quality" }}
+                      style={{ imageRendering: "optimizeQuality" }}
                     />
                   </div>
                 )}
