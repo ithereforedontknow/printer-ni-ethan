@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback } from "react";
 import type { Photo, PhotoSize } from "../utils/packingAlgorithms";
 
 // Hook for managing photo state with undo/redo
