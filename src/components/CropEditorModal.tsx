@@ -35,6 +35,7 @@ export const CropEditorModal: React.FC<CropEditorModalProps> = ({
     "move" | "nw" | "ne" | "sw" | "se" | null
   >(null);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [showPresets, setShowPresets] = useState(false);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -46,8 +47,8 @@ export const CropEditorModal: React.FC<CropEditorModalProps> = ({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Calculate optimal scale for display
-    const maxSize = 500;
+    // Calculate optimal scale for display - responsive to container
+    const maxSize = window.innerWidth < 768 ? 300 : 500;
     const displayScale = Math.min(
       maxSize / photo.imgWidth,
       maxSize / photo.imgHeight,
@@ -128,8 +129,8 @@ export const CropEditorModal: React.FC<CropEditorModalProps> = ({
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Draw corner handles
-    const handleSize = 12;
+    // Draw corner handles - larger on mobile
+    const handleSize = window.innerWidth < 768 ? 16 : 12;
     ctx.fillStyle = "#ffffff";
     ctx.strokeStyle = "#3b82f6";
     ctx.lineWidth = 2;
@@ -161,15 +162,26 @@ export const CropEditorModal: React.FC<CropEditorModalProps> = ({
     ctx.fillText(crop.aspectRatio, x + 15, y + 40);
   };
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (!canvasRef.current) return;
+  const getPointerPosition = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!canvasRef.current) return { x: 0, y: 0 };
 
     const rect = canvasRef.current.getBoundingClientRect();
-    const mouseX = (e.clientX - rect.left) / scale;
-    const mouseY = (e.clientY - rect.top) / scale;
+    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+    const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
 
-    // Check which part is being dragged
-    const handleSize = 20;
+    return {
+      x: (clientX - rect.left) / scale,
+      y: (clientY - rect.top) / scale,
+    };
+  };
+
+  const handlePointerDown = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!canvasRef.current) return;
+
+    const { x: mouseX, y: mouseY } = getPointerPosition(e);
+
+    // Larger touch targets for mobile
+    const handleSize = window.innerWidth < 768 ? 30 : 20;
 
     // Check corners first
     const corners = [
@@ -204,12 +216,12 @@ export const CropEditorModal: React.FC<CropEditorModalProps> = ({
     }
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
+  const handlePointerMove = (e: React.MouseEvent | React.TouchEvent) => {
     if (!isDragging || !canvasRef.current || !dragType) return;
 
-    const rect = canvasRef.current.getBoundingClientRect();
-    const mouseX = (e.clientX - rect.left) / scale;
-    const mouseY = (e.clientY - rect.top) / scale;
+    e.preventDefault(); // Prevent scrolling on touch devices
+
+    const { x: mouseX, y: mouseY } = getPointerPosition(e);
 
     let newCrop = { ...crop };
 
@@ -267,7 +279,7 @@ export const CropEditorModal: React.FC<CropEditorModalProps> = ({
     setCrop(newCrop);
   };
 
-  const handleMouseUp = () => {
+  const handlePointerUp = () => {
     setIsDragging(false);
     setDragType(null);
   };
@@ -301,6 +313,10 @@ export const CropEditorModal: React.FC<CropEditorModalProps> = ({
         aspectRatio: preset.name,
       });
     }
+    // Auto-close presets on mobile after selection
+    if (window.innerWidth < 768) {
+      setShowPresets(false);
+    }
   };
 
   const handleApply = async () => {
@@ -311,33 +327,72 @@ export const CropEditorModal: React.FC<CropEditorModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[95vh] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-0 md:p-4">
+      <div className="bg-white rounded-none md:rounded-2xl shadow-2xl w-full h-full md:max-w-6xl md:w-full md:max-h-[95vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="sticky top-0 bg-white px-6 pt-5 pb-3 flex items-center justify-between z-10 border-b">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <Crop className="w-6 h-6 text-purple-600" />
+        <div className="sticky top-0 bg-white px-4 md:px-6 pt-4 md:pt-5 pb-3 flex items-center justify-between z-10 border-b">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="p-1.5 md:p-2 bg-purple-100 rounded-lg">
+              <Crop className="w-5 h-5 md:w-6 md:h-6 text-purple-600" />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-gray-800">
-                Crop & Edit Photo
+              <h3 className="text-lg md:text-xl font-bold text-gray-800">
+                Crop & Edit
               </h3>
-              <p className="text-sm text-gray-600">{photo.name}</p>
+              <p className="text-xs md:text-sm text-gray-600 truncate max-w-[150px] md:max-w-none">
+                {photo.name}
+              </p>
             </div>
           </div>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            <X className="w-6 h-6 text-gray-600" />
+            <X className="w-5 h-5 md:w-6 md:h-6 text-gray-600" />
           </button>
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 overflow-hidden flex">
-          {/* Left: Presets Panel */}
-          <div className="w-80 border-r bg-gray-50 overflow-y-auto p-6">
+        <div className="flex-1 overflow-hidden flex flex-col md:flex-row">
+          {/* Mobile: Collapsible Presets */}
+          <div className="md:hidden border-b">
+            <button
+              onClick={() => setShowPresets(!showPresets)}
+              className="w-full px-4 py-3 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors"
+            >
+              <span className="font-semibold text-gray-700">Crop Presets</span>
+              <span className="text-sm text-gray-500">
+                {showPresets ? "Hide" : "Show"}
+              </span>
+            </button>
+            {showPresets && (
+              <div className="p-4 bg-gray-50 max-h-64 overflow-y-auto">
+                <div className="grid grid-cols-2 gap-2">
+                  {CROP_PRESETS.map((preset) => (
+                    <button
+                      key={preset.name}
+                      onClick={() => handlePresetSelect(preset)}
+                      className={`p-2.5 text-left rounded-lg transition-all duration-200 ${
+                        selectedPreset === preset.name
+                          ? "bg-purple-100 border-2 border-purple-500"
+                          : "border border-gray-200 hover:border-purple-300 hover:bg-purple-50"
+                      }`}
+                    >
+                      <div className="font-medium text-sm text-gray-800">
+                        {preset.name}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-0.5 line-clamp-1">
+                        {preset.description}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Desktop: Presets Panel */}
+          <div className="hidden md:block w-80 border-r bg-gray-50 overflow-y-auto p-6">
             <div className="mb-6">
               <h4 className="font-semibold text-gray-700 mb-4 flex items-center gap-2">
                 Crop Presets
@@ -445,27 +500,30 @@ export const CropEditorModal: React.FC<CropEditorModalProps> = ({
             </div>
           </div>
 
-          {/* Right: Crop Canvas */}
-          <div className="flex-1 overflow-auto p-6">
+          {/* Crop Canvas */}
+          <div className="flex-1 overflow-auto p-4 md:p-6">
             <div className="flex flex-col items-center h-full">
-              <div className="mb-6 text-center">
-                <h4 className="font-semibold text-gray-700 mb-2">
+              <div className="mb-4 md:mb-6 text-center px-2">
+                <h4 className="font-semibold text-gray-700 mb-1 md:mb-2 text-sm md:text-base">
                   Drag corners or edges to adjust
                 </h4>
-                <p className="text-sm text-gray-500">
+                <p className="text-xs md:text-sm text-gray-500 hidden md:block">
                   Hold Shift to maintain aspect ratio • Double-click to apply
                   preset
                 </p>
               </div>
 
-              <div className="relative flex-1 flex items-center justify-center">
+              <div className="relative flex-1 flex items-center justify-center w-full">
                 <div
                   ref={containerRef}
-                  className="relative rounded-lg shadow-2xl overflow-hidden"
-                  onMouseDown={handleMouseDown}
-                  onMouseMove={handleMouseMove}
-                  onMouseUp={handleMouseUp}
-                  onMouseLeave={handleMouseUp}
+                  className="relative rounded-lg shadow-2xl overflow-hidden touch-none"
+                  onMouseDown={handlePointerDown}
+                  onMouseMove={handlePointerMove}
+                  onMouseUp={handlePointerUp}
+                  onMouseLeave={handlePointerUp}
+                  onTouchStart={handlePointerDown}
+                  onTouchMove={handlePointerMove}
+                  onTouchEnd={handlePointerUp}
                 >
                   <canvas
                     ref={canvasRef}
@@ -473,7 +531,8 @@ export const CropEditorModal: React.FC<CropEditorModalProps> = ({
                     style={{
                       cursor: isDragging ? "grabbing" : "crosshair",
                       maxWidth: "100%",
-                      maxHeight: "70vh",
+                      maxHeight: "50vh",
+                      touchAction: "none",
                     }}
                   />
                   {isDragging && (
@@ -482,26 +541,61 @@ export const CropEditorModal: React.FC<CropEditorModalProps> = ({
                 </div>
               </div>
 
-              <div className="mt-6 flex items-center justify-between w-full max-w-2xl">
-                <div className="text-sm text-gray-600">
-                  Original: {photo.imgWidth} × {photo.imgHeight}px • Crop:{" "}
-                  {Math.round(crop.width)} × {Math.round(crop.height)}px
+              {/* Info and Actions */}
+              <div className="mt-4 md:mt-6 flex flex-col md:flex-row items-center justify-between w-full gap-3 md:gap-0 md:max-w-2xl">
+                <div className="text-xs md:text-sm text-gray-600 text-center md:text-left">
+                  <span className="hidden md:inline">
+                    Original: {photo.imgWidth} × {photo.imgHeight}px • Crop:{" "}
+                    {Math.round(crop.width)} × {Math.round(crop.height)}px
+                  </span>
+                  <span className="md:hidden">
+                    {Math.round(crop.width)} × {Math.round(crop.height)}px
+                  </span>
                 </div>
-                <div className="flex gap-3">
+                <div className="flex gap-2 md:gap-3 w-full md:w-auto">
                   <button
                     onClick={onClose}
-                    className="px-5 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                    className="flex-1 md:flex-none px-4 md:px-5 py-2 md:py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm md:text-base"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleApply}
-                    className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-colors font-medium flex items-center gap-2 shadow-lg"
+                    className="flex-1 md:flex-none px-4 md:px-5 py-2 md:py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-colors font-medium flex items-center justify-center gap-2 shadow-lg text-sm md:text-base"
                   >
-                    <Check className="w-5 h-5" />
+                    <Check className="w-4 h-4 md:w-5 md:h-5" />
                     Apply Crop
                   </button>
                 </div>
+              </div>
+
+              {/* Mobile: Quick Actions */}
+              <div className="mt-3 md:hidden flex gap-2 w-full">
+                <button
+                  onClick={async () => {
+                    await onReset(photo);
+                    onClose();
+                  }}
+                  className="flex-1 p-2.5 rounded-lg border border-gray-300 hover:bg-gray-50 text-sm"
+                >
+                  Reset
+                </button>
+                <button
+                  onClick={() => {
+                    setCrop({
+                      x: 0,
+                      y: 0,
+                      width: photo.imgWidth,
+                      height: photo.imgHeight,
+                      aspectRatio: "Full Image",
+                    });
+                    setSelectedPreset("Free Form");
+                  }}
+                  className="flex-1 p-2.5 rounded-lg border border-gray-300 hover:bg-gray-50 flex items-center justify-center gap-1 text-sm"
+                >
+                  <Maximize2 className="w-3.5 h-3.5" />
+                  Fill
+                </button>
               </div>
             </div>
           </div>
