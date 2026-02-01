@@ -451,6 +451,9 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 p-4 md:p-6">
       <div className="max-w-8xl mx-auto">
+        <h1 className="text-5xl font-extrabold mb-4 text-center bg-linear-to-br from from-slate-50 via-blue-50 to-indigo-50">
+          Printer ni Ethan
+        </h1>
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
           {/* Left Sidebar - Controls */}
           <div className="xl:col-span-1 space-y-4">
