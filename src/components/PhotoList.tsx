@@ -37,7 +37,7 @@ interface PhotoListProps {
   onFileUpload: (files: FileList | null) => void;
   isUploading: boolean;
   uploadProgress: number;
-  fileInputRef: React.RefObject<HTMLInputElement>;
+  fileInputRef: React.RefObject<HTMLInputElement | null>;
   // Photo editing props
   onCropPhoto: (photoId: number, crop: any) => Promise<void>;
   onQuickCrop: (photoId: number, preset: any) => Promise<void>;
@@ -109,8 +109,8 @@ export const PhotoList: React.FC<PhotoListProps> = ({
     await onQuickCrop(photo.id, preset);
   };
 
-  const handleResetCrop = (photo: Photo) => {
-    onResetCrop(photo.id);
+  const handleResetCrop = async (photo: Photo) => {
+    await onResetCrop(photo.id);
   };
 
   const handleAddSize = (photoId: number, size: PhotoSize) => {
@@ -320,7 +320,6 @@ const PhotoItem: React.FC<{
   onDragOver,
   onDragEnd,
   onDrop,
-  isTouchDevice,
 }) => {
   const hasCrop = !!photo.crop;
   const totalCopies = photo.sizes.reduce((sum, size) => sum + size.quantity, 0);
@@ -627,9 +626,7 @@ const AddSizeModal: React.FC<{
             Cancel
           </button>
           <button
-            onClick={() =>
-              onAddSize(photoId, { ...selectedSize, quantity, rotation: 0 })
-            }
+            onClick={() => onAddSize(photoId, { ...selectedSize })}
             className="flex-1 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700"
           >
             Add Size

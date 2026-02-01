@@ -224,14 +224,11 @@ export const usePhotoEditing = (): UsePhotoEditingReturn => {
     [],
   );
 
-  const applyFilter = useCallback(
-    async (photo: Photo, filter: ImageFilter): Promise<Photo> => {
-      // Filter implementation would go here
-      // For now, return original
-      return photo;
-    },
-    [],
-  );
+  const applyFilter = useCallback(async (photo: Photo): Promise<Photo> => {
+    // Filter implementation would go here
+    // For now, return original
+    return photo;
+  }, []);
 
   return {
     editingPhoto,

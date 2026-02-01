@@ -111,7 +111,7 @@ const App: React.FC = () => {
     window.addEventListener("keydown", handleKeyDown);
 
     // PWA Service Worker
-    if ("serviceWorker" in navigator && process.env.NODE_ENV === "production") {
+    if ("serviceWorker" in navigator && import.meta.env.PROD) {
       navigator.serviceWorker
         .register("/service-worker.js")
         .then((registration) => {
@@ -363,16 +363,25 @@ const App: React.FC = () => {
       });
     });
 
-    const packed = packPhotos(expandedPhotos, packingAlgorithm, {
-      paperWidth: paperSize.width,
-      paperHeight: paperSize.height,
-      marginTop: settings.marginTop,
-      marginRight: settings.marginRight,
-      marginBottom: settings.marginBottom,
-      marginLeft: settings.marginLeft,
-      spacing: settings.spacing,
-      multiPage: settings.multiPage,
-    });
+    const packed = packPhotos(
+      expandedPhotos.map((p) => ({
+        ...p,
+        name: p.id.toString(),
+        imgWidth: p.size.width, // Map width to imgWidth
+        imgHeight: p.size.height, // Map height to imgHeight
+      })),
+      packingAlgorithm,
+      {
+        paperWidth: paperSize.width,
+        paperHeight: paperSize.height,
+        marginTop: settings.marginTop,
+        marginRight: settings.marginRight,
+        marginBottom: settings.marginBottom,
+        marginLeft: settings.marginLeft,
+        spacing: settings.spacing,
+        multiPage: settings.multiPage,
+      },
+    );
 
     setLayoutResult(packed);
     setCurrentPage(0);
@@ -440,7 +449,7 @@ const App: React.FC = () => {
     : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4 md:p-6">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 p-4 md:p-6">
       <div className="max-w-8xl mx-auto">
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
           {/* Left Sidebar - Controls */}
@@ -449,7 +458,9 @@ const App: React.FC = () => {
               paperSize={paperSize}
               onPaperSizeChange={setPaperSize}
               packingAlgorithm={packingAlgorithm}
-              onAlgorithmChange={setPackingAlgorithm}
+              onAlgorithmChange={(algo) =>
+                setPackingAlgorithm(algo as PackingAlgorithm)
+              }
               settings={settings}
               onSettingsChange={setSettings}
               onUndo={undo}

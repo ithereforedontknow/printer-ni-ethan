@@ -8,6 +8,9 @@ interface UseDragAndDropReturn {
   handleDragEnd: () => void;
   handleDrop: (e: React.DragEvent, photoId: number) => void;
   isTouchDevice: boolean;
+  handleTouchStart: (e: React.TouchEvent, photoId: number) => void;
+  handleTouchMove: (e: React.TouchEvent, photoId: number) => void;
+  handleTouchEnd: (e: React.TouchEvent, photoId: number) => void;
 }
 
 export const useDragAndDrop = (): UseDragAndDropReturn => {

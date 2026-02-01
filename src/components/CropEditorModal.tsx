@@ -16,7 +16,6 @@ export const CropEditorModal: React.FC<CropEditorModalProps> = ({
   isOpen,
   onClose,
   onApplyCrop,
-  onQuickCrop,
   onReset,
 }) => {
   const [crop, setCrop] = useState(

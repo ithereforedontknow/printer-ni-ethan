@@ -32,11 +32,13 @@ export interface Photo {
   originalDataUrl: string; // Keep original for reset
   imgWidth: number;
   imgHeight: number;
-  // Support multiple sizes per photo
+  size: PhotoSize;
+  rotation: number;
+  quantity: number;
   sizes: Array<{
     size: PhotoSize;
     quantity: number;
-    rotation: number;
+    rotation: number; // <--- ADD THIS LINE HERE
   }>;
   crop?: {
     x: number;

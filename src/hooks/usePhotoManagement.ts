@@ -102,10 +102,12 @@ export const useFileUpload = ({
           newPhotos.push({
             id: Date.now() + i,
             name: file.name,
-            dataUrl,
+            dataUrl: dataUrl,
             imgWidth: dimensions.width,
             imgHeight: dimensions.height,
+            originalDataUrl: dataUrl,
             size: defaultSize,
+            sizes: [{ size: defaultSize, quantity: 1, rotation: 0 }],
             quantity: 1,
             rotation: 0,
           });

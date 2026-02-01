@@ -19,7 +19,7 @@ interface PreviewProps {
   onPageChange: (page: number) => void;
   onDownloadPNG: () => void;
   onDownloadPDF: () => void;
-  canvasRef: React.RefObject<HTMLCanvasElement>;
+  canvasRef: React.RefObject<HTMLCanvasElement | null>;
   totalPhotos: number;
   packedPhotos: number;
 }
