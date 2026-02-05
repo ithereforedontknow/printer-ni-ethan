@@ -89,6 +89,9 @@ export const PHOTO_SIZES: PhotoSize[] = [
   { name: "1x1", width: 1, height: 1 },
   { name: "2x2", width: 2, height: 2 },
   { name: "2x3", width: 2, height: 3 },
+  // calling card size
+  { name: "Calling Card (2x3.5)", width: 2, height: 3.5 },
+  { name: "Calling Card (3.5x2)", width: 3.5, height: 2 },
   { name: "Passport (2x2)", width: 2, height: 2 },
   { name: "3x5", width: 3, height: 5 },
   { name: "4x6", width: 4, height: 6 },

@@ -397,7 +397,6 @@ const App: React.FC = () => {
     link.click();
   };
 
-  // Download PDF
   const downloadPDF = () => {
     if (!layoutResult) return;
 
@@ -418,8 +417,11 @@ const App: React.FC = () => {
       const pagePhotos = layoutResult.filter(
         (photo) => photo.pageIndex === page,
       );
+
       pagePhotos.forEach((photo) => {
         const dims = getRotatedDimensions(photo);
+
+        // 1. Draw the image
         pdf.addImage(
           photo.dataUrl,
           "JPEG",
@@ -431,6 +433,69 @@ const App: React.FC = () => {
           "FAST",
           photo.rotation,
         );
+
+        // 2. Draw Cut Lines if enabled
+        if (settings.showCutLines) {
+          // Set line style: Thin red line
+          pdf.setDrawColor(239, 68, 68); // #ef4444 (Red-500)
+          pdf.setLineWidth(0.01);
+
+          // --- Dashed Box ---
+          // [dash_length, gap_length] in inches
+          pdf.setLineDashPattern([0.1, 0.05], 0);
+          pdf.rect(photo.x, photo.y, dims.width, dims.height);
+
+          // --- Corner Marks (Solid Lines) ---
+          pdf.setLineDashPattern([], 0); // Reset to solid line
+
+          const markLength = 0.125; // 1/8th inch mark
+
+          // Top-Left
+          pdf.line(photo.x - markLength, photo.y, photo.x, photo.y);
+          pdf.line(photo.x, photo.y - markLength, photo.x, photo.y);
+
+          // Top-Right
+          pdf.line(
+            photo.x + dims.width,
+            photo.y,
+            photo.x + dims.width + markLength,
+            photo.y,
+          );
+          pdf.line(
+            photo.x + dims.width,
+            photo.y - markLength,
+            photo.x + dims.width,
+            photo.y,
+          );
+
+          // Bottom-Left
+          pdf.line(
+            photo.x - markLength,
+            photo.y + dims.height,
+            photo.x,
+            photo.y + dims.height,
+          );
+          pdf.line(
+            photo.x,
+            photo.y + dims.height,
+            photo.x,
+            photo.y + dims.height + markLength,
+          );
+
+          // Bottom-Right
+          pdf.line(
+            photo.x + dims.width,
+            photo.y + dims.height,
+            photo.x + dims.width + markLength,
+            photo.y + dims.height,
+          );
+          pdf.line(
+            photo.x + dims.width,
+            photo.y + dims.height,
+            photo.x + dims.width,
+            photo.y + dims.height + markLength,
+          );
+        }
       });
     }
 
