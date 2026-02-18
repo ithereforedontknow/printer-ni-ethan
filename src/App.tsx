@@ -520,28 +520,6 @@ const App: React.FC = () => {
           Printer ni Ethan
         </h1>
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
-          {/* Left Sidebar - Controls */}
-          <div className="xl:col-span-1 space-y-4">
-            <LayoutControls
-              paperSize={paperSize}
-              onPaperSizeChange={setPaperSize}
-              packingAlgorithm={packingAlgorithm}
-              onAlgorithmChange={(algo) =>
-                setPackingAlgorithm(algo as PackingAlgorithm)
-              }
-              settings={settings}
-              onSettingsChange={setSettings}
-              onUndo={undo}
-              onRedo={redo}
-              canUndo={canUndo}
-              canRedo={canRedo}
-              onGenerateLayout={generateLayout}
-              hasPhotos={photos.length > 0}
-              isGenerating={isGenerating}
-              onShowAdvanced={() => setShowAdvanced(true)}
-            />
-          </div>
-
           {/* Center - Photo List */}
           <div className="xl:col-span-1">
             <PhotoList
@@ -571,6 +549,27 @@ const App: React.FC = () => {
               onDragEnd={handleDragEnd}
               onDrop={handleDrop}
               isTouchDevice={isTouchDevice}
+            />
+          </div>
+          {/* Left Sidebar - Controls */}
+          <div className="xl:col-span-1 space-y-4">
+            <LayoutControls
+              paperSize={paperSize}
+              onPaperSizeChange={setPaperSize}
+              packingAlgorithm={packingAlgorithm}
+              onAlgorithmChange={(algo) =>
+                setPackingAlgorithm(algo as PackingAlgorithm)
+              }
+              settings={settings}
+              onSettingsChange={setSettings}
+              onUndo={undo}
+              onRedo={redo}
+              canUndo={canUndo}
+              canRedo={canRedo}
+              onGenerateLayout={generateLayout}
+              hasPhotos={photos.length > 0}
+              isGenerating={isGenerating}
+              onShowAdvanced={() => setShowAdvanced(true)}
             />
           </div>
 
